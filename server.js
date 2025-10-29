@@ -4,6 +4,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 require('dotenv').config();
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -381,6 +383,17 @@ app.get('/api/user', authenticateToken, (req, res) => {
         }
     );
 });
+
+// Servir frontend estático (se o build existir)
+const frontendDist = path.join(__dirname, 'Frontend', 'dist');
+if (fs.existsSync(frontendDist)) {
+    app.use(express.static(frontendDist));
+    // Para qualquer rota que não seja API, devolve o index.html do frontend
+    app.get('*', (req, res) => {
+        if (req.path.startsWith('/api')) return res.status(404).json({ error: 'Not Found' });
+        res.sendFile(path.join(frontendDist, 'index.html'));
+    });
+}
 
 app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
