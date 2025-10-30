@@ -92,5 +92,17 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: (() => {
+    const p: any[] = [];
+    try {
+      // Try to require the optional animation plugin; if it's not installed, skip it.
+      // This prevents build failures in environments where the package isn't available.
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const animate = require("tailwindcss-animate");
+      if (animate) p.push(animate);
+    } catch (e) {
+      // plugin not available — continue without it
+    }
+    return p;
+  })(),
 } satisfies Config;
